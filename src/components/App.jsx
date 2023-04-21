@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import getImages from 'utils/axios';
 import Searchbar from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -7,98 +7,75 @@ import Modal from './Modal/Modal';
 import Loader from './Loader/Loader';
 import Button from './Button/Button';
 
-export class App extends Component {
-  state = {
-    pictures: [],
-    page: 1,
-    queryValue: '',
-    isLoading: false,
-    showModal: false,
-    largeImage: '',
-    error: null,
-    showMore:false,
-  };
-  
+export const App = () =>  {
 
-  fetchImages = async () => {
-    const { queryValue, page } = this.state;
-    this.setState({
-      isLoading: true,
-    });
-  
+  const [pictures,setPictures] = useState([]);
+  const [page,setPage] = useState(1);
+  const [queryValue,setQueryValue] = useState("");
+  const [isLoading,setIsLoading] = useState(false);
+  const [showModal,setShowModal] = useState(false);
+  const [largeImage,setLargeImage] = useState("");
+  const [showMore,setshowMore] = useState(false);
+
+ const fetchImages = async () => {
+    setIsLoading(true);
     try {
       const newImages = await getImages(queryValue, page);
-      console.log(this.state.page<Math.ceil(newImages.total/12))
-      this.setState(prevState => ({
-        pictures: [...prevState.pictures, ...newImages.pictures],
-        showMore:this.state.page<Math.ceil(newImages.total/12),
-      }));
+      setPictures(prevState => [...prevState,...newImages.pictures])
+      setshowMore(!!(page<Math.ceil(newImages.total/12)))
     } catch (error) {
       console.log(error);
     }finally{
-      this.setState({
-        isLoading: false,
-      });
+      setIsLoading(false);
     }
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.queryValue !== this.state.queryValue || this.state.page!==prevState.page) {
-      this.fetchImages();
-    }
-  }
+ useEffect(()=>{
+  if(queryValue==="") return;
+  fetchImages();
+  // eslint-disable-next-line
+ },[queryValue,page])
 
-  onSubmitHandler = queryInput => {
+ const onSubmitHandler = queryInput => {
     if (queryInput === '') {
       return;
     }
-    this.setState({
-      pictures: [],
-      page: 1,
-      queryValue: queryInput,
-    });
+    setPictures([]);
+    setPage(1);
+    setQueryValue(queryInput);
   };
 
-  getLargePicture = largePicture => {
-    console.log('onPictureClick');
-    this.setState({
-      largeImage: largePicture,
-      showModal: true,
-    });
+ const getLargePicture = largePicture => { 
+   setLargeImage(largePicture);
+    setShowModal(true);
   };
 
-  togleModal = () => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-      largeImage: '',
-    }));
+ const togleModal = () => {
+    setShowModal(prev=>!prev);
+    setLargeImage("");
   };
 
-  loadMoreHandler = () => {
-    this.setState(prev=>({
-      page:prev.page+1,
-    }))
+  const loadMoreHandler = () => {
+    setPage(prevState=>prevState+1);
   }
 
-  render() {
-    
     return (
       <div className="App">
-        <Searchbar onSearch={this.onSubmitHandler} />
+        <Searchbar onSearch={onSubmitHandler} />
 
         <ImageGallery
-          images={this.state.pictures}
-          onPictureClick={this.getLargePicture}
+          images={pictures}
+          onPictureClick={getLargePicture}
         />
         
-        {this.state.isLoading && <Loader />}
-        {this.state.showModal && (
-          <Modal onClose={this.togleModal}>
-            <img className="modal-picture" alt='bgp' src={this.state.largeImage} />
+        {isLoading && <Loader />}
+        {showModal && (
+          <Modal onClose={togleModal}>
+            <img className="modal-picture" alt='bgp' src={largeImage} />
           </Modal>
         )}
-        {this.state.showMore && <Button onClick={this.loadMoreHandler} />}
+        {showMore && <Button onClick={loadMoreHandler} />}
       </div>
     );
   }
-}
+

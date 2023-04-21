@@ -1,37 +1,23 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-class Searchbar extends Component {
-  state = {
-    query: '',
-  };
+const Searchbar  =({onSearch})=> {
 
-  componentDidUpdate(prev) {
-    if (prev.query === this.state.query) {
-      return;
-    }
-  }
+  const [query,setQuery] = useState("");
 
-  inputHandler = e => {
+  const submitHandler = e => {
     e.preventDefault();
-    this.setState({ query: e.target.value });
+    if (query==="") return;
+    onSearch(query);
+    resetForm();
   };
 
-  submitHandler = e => {
-    e.preventDefault();
-    if (!this.state.query) return;
-    this.props.onSearch(this.state.query);
-    this.resetForm();
+  const resetForm = () => {
+   setQuery("");
   };
 
-  resetForm = () => {
-    this.setState({
-      query: '',
-    });
-  };
 
-  render() {
     return (
-      <header className="Searchbar" onSubmit={this.submitHandler}>
+      <header className="Searchbar" onSubmit={submitHandler}>
         <form className="form">
           <button type="submit" className="button">
             <span className="button-label">Search</span>
@@ -43,14 +29,14 @@ class Searchbar extends Component {
             autoFocus
             placeholder="Search images and photos"
             name="query"
-            value={this.state.query}
-            onChange={this.inputHandler}
+            value={query}
+            onChange={e=>setQuery(e.target.value)}
           />
         </form>
       </header>
     );
   }
-}
+
 
 Searchbar.propTypes = {
   onSearch: PropTypes.func.isRequired,
