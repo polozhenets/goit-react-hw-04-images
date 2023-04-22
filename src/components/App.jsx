@@ -17,7 +17,10 @@ export const App = () =>  {
   const [largeImage,setLargeImage] = useState("");
   const [showMore,setshowMore] = useState(false);
 
- const fetchImages = async () => {
+ 
+
+ useEffect(()=>{
+  const fetchImages = async () => {
     setIsLoading(true);
     try {
       const newImages = await getImages(queryValue, page);
@@ -29,11 +32,7 @@ export const App = () =>  {
       setIsLoading(false);
     }
   };
-
- useEffect(()=>{
-  if(queryValue==="") return;
   fetchImages();
-  // eslint-disable-next-line
  },[queryValue,page])
 
  const onSubmitHandler = queryInput => {

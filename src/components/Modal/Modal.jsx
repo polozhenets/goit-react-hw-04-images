@@ -7,19 +7,16 @@ const Modal= ({onClose,children})=> {
  
 
   useEffect(()=>{
+    const handleKeyDown = event => {
+      if (event.currentTarget.button === 0) {
+      onClose();
+      }
+    };
     window.addEventListener('mousedown', handleKeyDown);
     return () =>{
       window.removeEventListener('mousedown', handleKeyDown);
     }
-  },[])
-
-  const handleKeyDown = event => {
-    if (event.currentTarget.button === 0) {
-      this.props.onClose();
-    }
-  };
-
-
+  },[onClose])
 
   const handleBackdropClick = event => {
     if (event.currentTarget === event.target) {
